@@ -12,10 +12,11 @@ void UBSettingsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	
-	// load and apply settings :
+	// Load settings from the .ini file :
 	auto const GameUserSettings = UBSGameUserSettings::GetUBSGameUserSettings();
 	GameUserSettings->ValidateSettings(); // Ensure settings value are valid before use the object.
 	GameUserSettings->InitializeSettings(GetGameInstance());
+	// Apply loaded settings to set the game in the same configuration as the last session.
 	GameUserSettings->ApplySettings(false);
 
 	UE_LOG(LogBaseSettingsSubsystem, All, TEXT("GameUserSettings loaded and applayed !"));

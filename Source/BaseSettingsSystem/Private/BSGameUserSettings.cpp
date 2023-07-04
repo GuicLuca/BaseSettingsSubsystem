@@ -50,6 +50,8 @@ void UBSGameUserSettings::ApplySettings(bool bCheckForCommandLineOverrides)
 void UBSGameUserSettings::ApplyNonResolutionSettings()
 {
 	ApplySoundSettings();
+	// Set the new last fps value saved
+	SetLastFPSLimitValueSaved(GetFrameRateLimit());
 	Super::ApplyNonResolutionSettings();
 }
 

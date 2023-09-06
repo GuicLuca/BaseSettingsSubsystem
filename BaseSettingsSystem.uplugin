@@ -18,7 +18,16 @@
 		{
 			"Name": "BaseSettingsSystem",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+          		"CommonUI"
+        	]
 		}
-	]
+	],
+  "Plugins": [
+    {
+      "Name": "CommonUI",
+      "Enabled": true
+    }
+  ]
 }

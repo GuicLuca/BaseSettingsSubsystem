@@ -40,7 +40,6 @@ public class BaseSettingsSystem : ModuleRules
 				"Slate",
 				"SlateCore",
 				"UMG",
-				"CommonUI",
 				"AudioMixer"
 				// ... add private dependencies that you statically link with here ...	
 			}

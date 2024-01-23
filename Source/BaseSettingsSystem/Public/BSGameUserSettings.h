@@ -7,15 +7,11 @@
 #include "GameFramework/GameUserSettings.h"
 #include "BSGameUserSettings.generated.h"
 
-/**
- * @brief This delegate is fired when a problem append to let the user know what append.
- * If you call this delegate don't forget to use the macro NSLOCTEXT to track and localize the error message.
- */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBSShowMessage, FText, message);
+class UBSGameInstance;
 
 /**
  * @brief This delegate is a custom version of the OnAudioSwapCompleted to allow the blueprint know when the swap is completed.
- * @example You can plug the UI on this event to stop the waiting animation
+ * You can plug the UI on this event to stop the waiting animation
  */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBSOnAudioDeviceSwapFinish, const FSwapAudioOutputResult&, SwapResult);
 
@@ -40,7 +36,7 @@ class BASESETTINGSSYSTEM_API UBSGameUserSettings : public UGameUserSettings
 	GENERATED_UCLASS_BODY()
 	/**
 	 * @brief Overriding method of the default class to add the applying process of new custom settings.
-	 * @param bCheckForCommandLineOverrides true if you want to check command line overrides. (Set it ti FALSE by default)
+	 * @param bCheckForCommandLineOverrides true if you want to check command line overrides. (Set it to FALSE by default)
 	 */
 	virtual void ApplySettings(bool bCheckForCommandLineOverrides) override;
 
@@ -59,12 +55,12 @@ class BASESETTINGSSYSTEM_API UBSGameUserSettings : public UGameUserSettings
 	 * called in ApplySettings, ApplyNonResolutionSettings to
 	 */
 	UFUNCTION(BlueprintCallable)
-	void ApplySoundSettings();
+	virtual void ApplySoundSettings();
 
 	/**
 	 * @brief This method is called to transform settings value that need to be set in the engine or wherever.
 	 */
-	void InitializeSettings(UGameInstance* InGameInstance);
+	virtual void InitializeSettings(UGameInstance* InGameInstance);
 
 	/**
 	 * @brief Check if any updated settings need a restart to be effective.
@@ -72,7 +68,13 @@ class BASESETTINGSSYSTEM_API UBSGameUserSettings : public UGameUserSettings
 	 * @return True if an updated setting need the game to restart to be applied.
 	 */
 	UFUNCTION(BlueprintPure, Category="BSSettings")
-	bool IsRestartNeededToBeEffective() const;
+	virtual bool IsRestartNeededToBeEffective() const;
+
+	/**
+	 * @brief This method ensure that settings values are valid
+	 * before use them and replace them by default values if needed.
+	 */
+	virtual void ValidateSettings() override;
 
 	/** ==============
 	 *     ACCESSORS
@@ -104,6 +106,11 @@ class BASESETTINGSSYSTEM_API UBSGameUserSettings : public UGameUserSettings
 	void SetUIVolume(float InVolume);
 	UFUNCTION(BlueprintPure, Category="BSSettings")
 	float GetUIVolume() const;
+	
+	UFUNCTION(BlueprintCallable, Category="BSSettings")
+	void SetMouseSensitivity(float InSensitivity);
+	UFUNCTION(BlueprintPure, Category="BSSettings")
+	float GetMouseSensitivity() const;
 
 	UFUNCTION(BlueprintCallable, Category="BSSettings")
 	void SetAudioOutputDeviceId(FString InAudioID);
@@ -142,22 +149,18 @@ protected:
 
 	// Reference to the game instance used to access special UObject that need to be referenced in Blueprint.
 	UPROPERTY()
-	TObjectPtr<UGameInstance> GameInstance;
+	TObjectPtr<UBSGameInstance> GameInstance;
 
 	/** =================
 	 *     Delegates
 	 * ==================*/
-	// This delegate is only used by the cpp to call OnSwapCompletedHandler method.
+	// This delegate is only used by the c++ to call OnSwapCompletedHandler method.
 	UPROPERTY()
-	FOnCompletedDeviceSwap OnSwapCompleted;
+	FOnCompletedDeviceSwap CppOnSwapCompleted; // DYNAMIC DELEGATE
+
 	// Use this delegate to let the Blueprint know when the swap is fully completed. (e.g. : Used for ui updated)
 	UPROPERTY(BlueprintAssignable)
-	FBSOnAudioDeviceSwapFinish OnSwapCompletedCustom;
-
-	// This delegate allow you to display special message in popup for example.
-	UPROPERTY(BlueprintAssignable)
-	FBSShowMessage OnShowMessage;
-
+	FBSOnAudioDeviceSwapFinish OnSwapCompleted;
 
 	/** =============================
 	 *     Custom settings values
@@ -175,6 +178,9 @@ protected:
 	float UIVolume;
 	UPROPERTY(Config)
 	FString AudioOutputDeviceId;
+	// Other settings
+	UPROPERTY(Config)
+	float MouseSensitivity;
 
 	/** ============================================================
 	 *                        Controls variables
